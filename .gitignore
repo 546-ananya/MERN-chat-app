@@ -1,0 +1,9 @@
+# Ignore environment files (both frontend & backend)
+**/.env
+
+# Ignore node_modules everywhere
+**/node_modules/
+
+# Optional ignores
+.DS_Store
+Thumbs.db
