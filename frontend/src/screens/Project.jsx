@@ -91,13 +91,27 @@ const Project = () => {
     }
 
     function WriteAiMessage(message) {
-
-        const messageObject = JSON.parse(message)
-
+        let messageObject = {};
+        try {
+            messageObject = JSON.parse(message);
+        } catch (e) {
+            messageObject = { text: message };
+        }
+        // Use 'message' if 'text' is missing
+        if (!messageObject.text && messageObject.message) {
+            messageObject.text = messageObject.message;
+        }
+        if (!messageObject.text && messageObject.reply) {
+            messageObject.text = messageObject.reply;
+        }
+        if (!messageObject.text && messageObject.javascriptFunction) {
+            messageObject.text = messageObject.javascriptFunction;
+        }
+        if (!messageObject.text) {
+            messageObject.text = "No response from AI.";
+        }
         return (
-            <div
-                className='bg-slate-950 text-white rounded-sm p-2 w-full max-h-96 overflow-auto'
-            >
+            <div className='bg-slate-950 text-white rounded-sm p-4 w-full'>
                 <Markdown
                     children={messageObject.text}
                     options={{
@@ -106,7 +120,8 @@ const Project = () => {
                         },
                     }}
                 />
-            </div>)
+            </div>
+        );
     }
 
     useEffect(() => {
@@ -132,10 +147,8 @@ const Project = () => {
 
                 console.log(message)
 
-                webContainer?.mount(message.fileTree)
-
-                if (message.fileTree) {
-                    setFileTree(message.fileTree || {})
+                if (message.fileTree && typeof message.fileTree === 'object') {
+                    webContainer?.mount(message.fileTree);
                 }
                 setMessages(prevMessages => [ ...prevMessages, data ]) // Update messages state
             } else {
@@ -202,7 +215,7 @@ const Project = () => {
                         ref={messageBox}
                         className="message-box p-1 flex-grow flex flex-col gap-1 overflow-auto max-h-full scrollbar-hide">
                         {messages.map((msg, index) => (
-                            <div key={index} className={`${msg.sender._id === 'ai' ? 'max-w-80' : 'max-w-52'} ${msg.sender._id == user._id.toString() && 'ml-auto'}  message flex flex-col p-2 bg-slate-50 w-fit rounded-md`}>
+                            <div key={index} className={`${msg.sender._id === 'ai' ? 'w-full' : 'max-w-52'} ${msg.sender._id == user._id.toString() && 'ml-auto'}  message flex flex-col p-2 bg-slate-50 rounded-md`}>
                                 <small className='opacity-65 text-xs'>{msg.sender.email}</small>
                                 <div className='text-sm'>
                                     {msg.sender._id === 'ai' ?
